@@ -1,10 +1,10 @@
 #include"sock_util.h"
 
-int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_ms, bool nonblock)
+int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_sec, bool nonblock)
 {
 	if(INADDR_NONE == inet_addr(ip))
 	{
-		LOG("Invalid ip");
+		LOG("Invalid Ip");
 		return false;
 	}
 	
@@ -33,12 +33,12 @@ int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_m
 		fd_set wset;
 		FD_ZERO(&wset);
 		struct timeval tval;
-		tval.tv_sec = 0;
-		tval.tv_usec = connect_timeout_ms;
+		tval.tv_sec = connect_timeout_sec;
+		tval.tv_usec = 0;
 		FD_SET(sockfd, &wset);
 		if(connect_ret != 0 && (errno != EINPROGRESS) && (errno != EAGAIN))
 		{
-			LOG("connect failed");
+			LOG("Connect Failed");
 			error = -1;
 		}
 		if( error ==0 && connect_ret !=0 )
@@ -46,7 +46,7 @@ int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_m
 			connect_ret = select(sockfd+1, nullptr, &wset ,nullptr, &tval);
 			if( connect_ret <= 0 ) // timeout or failed
 			{
-				LOG("connect timeout");
+				LOG("Connect Timeout");
 				close(sockfd);
 				return  -1;
 			}
@@ -55,7 +55,7 @@ int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_m
 				socklen_t errlen = sizeof(error);
 				if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &errlen) < 0)
 				{
-					LOG("getsockopt failed");
+					LOG("Getsockopt Failed");
 					error = -1;
 				}
 			}
@@ -74,7 +74,7 @@ int SockUtil::Connect(const char* ip, unsigned short port, int connect_timeout_m
 	{
 		if(connect_ret != 0)
 		{
-			LOG("connect block failed");
+			LOG("Connect Block Failed");
 			close(sockfd);
 			return -1;
 		}
@@ -93,7 +93,7 @@ int SockUtil::Listen(const char* ip, unsigned short port)
 	int reuse = 1;
 	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
 	{
-		LOG("Setsockopt SO_REUSEADDR failed");
+		LOG("Setsockopt SO_REUSEADDR Failed");
 	}
 
 	struct sockaddr_in seraddr;
@@ -107,7 +107,7 @@ int SockUtil::Listen(const char* ip, unsigned short port)
 		seraddr.sin_addr.s_addr = inet_addr(ip);
 		if(INADDR_NONE == seraddr.sin_addr.s_addr)
 		{
-			LOG("inet_addr failed");
+			LOG("Inet_addr Failed");
 			close(sockfd);
 			return -1;
 		}
@@ -115,14 +115,14 @@ int SockUtil::Listen(const char* ip, unsigned short port)
 
 	if(bind(sockfd, (struct sockaddr *)&seraddr, sizeof(seraddr)) < 0 )
 	{
-		LOG("bind failed");
+		LOG("Bind Failed");
 		close(sockfd);
 		return -1;
 	}
 
 	if(listen(sockfd, 256) < 0)
 	{
-		LOG("listen failed");
+		LOG("Listen Failed");
 		close(sockfd);
 		return -1;
 	}
