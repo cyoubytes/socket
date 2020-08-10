@@ -133,12 +133,36 @@ int SockUtil::Accept(int listenfd)
 {
 	 struct sockaddr_in cliaddr;
 	 socklen_t clilen = sizeof(cliaddr);
-	 int conn=accept(listenfd,(struct sockaddr*)&cliaddr,&clilen);
-	 cout<<"listenfd="<<listenfd<<endl;
-	 char buf[1024];
-	 recv(conn, buf, 1024, 0);
-	 std::cout<<buf<<std::endl;
-	 send(conn, buf, 1024, 0);
-	 return 0;
+
+	 fd_set rset;
+	 FD_ZERO(&rset);
+	 FD_SET(listenfd,&rset);
+	 while(1)
+	 {
+		 int ret=select(listenfd+1,&rset,nullptr, nullptr,nullptr);
+		 if(ret < 0)
+		 {
+			 LOG("select failed");
+			 return -1;
+		 }
+		 int conn=accept(listenfd,(struct sockaddr*)&cliaddr,&clilen);
+		 if(conn <0)
+		 {
+			if(errno != EAGAIN || errno != EWOULDBLOCK)
+			{
+				 LOG("accept failed");
+				 return -1;
+			}
+		 }
+		 //int conn=accept4(listenfd,(struct sockaddr*)&cliaddr,&clilen,SOCK_NONBLOCK);
+		 cout<<"listenfd="<<listenfd<<" conn="<<conn<<endl;
+		 char buf[1024];
+		 recv(conn, buf, 1024, 0);
+		 std::cout<<buf<<std::endl;
+		 send(conn, buf, 1024, 0);
+		 close(conn);
+	 }
+	close(listenfd);
+	return 0;
 }
 

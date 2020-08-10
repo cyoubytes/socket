@@ -11,13 +11,11 @@ int main(int argc, char ** argv)
 	if(conn > 0)
 	{
 		char buf[256];
-		while(1)
-		{
-			cin>>buf;
-			send(conn, buf, 256, 0);
-			std::cout<<buf<<std::endl;
-			recv(conn, buf, 256, 0);
-			std::cout<<buf<<std::endl;
-		}
+		cin>>buf;
+		send(conn, buf, 256, 0);
+		std::cout<<buf<<std::endl;
+		recv(conn, buf, 256, 0);
+		std::cout<<buf<<std::endl;
+		close(conn);
 	}
 }
