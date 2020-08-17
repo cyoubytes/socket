@@ -17,6 +17,7 @@
 #include<fcntl.h>
 #include<pthread.h>
 #include<iostream>
+#include<sys/types.h>
 
 using namespace std;
 
@@ -29,5 +30,7 @@ do \
 
 
 void log(const char* msg, ...);
+
+void echoServer(int connfd);
 
 #endif

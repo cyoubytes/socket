@@ -7,6 +7,5 @@ int main(void)
 	short port=8888;
     int sockfd=SockUtil::Listen(ip,port);
 	SockUtil::Accept(sockfd);
-
 	return 0;
 }
