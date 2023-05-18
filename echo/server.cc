@@ -1,12 +1,10 @@
 #include<iostream>
 #include<sys/socket.h>
 #include<arpa/inet.h>
+#include<netinet/in.h>
 #include<string.h>
-#include <unistd.h>
-
-
-#define BACKLOG 1024
-#define BUFFER  4096
+#include<unistd.h>
+#include"config.h"
 
 
 void echo(int connfd){
@@ -35,8 +33,6 @@ void echo(int connfd){
 
 int main(int argc, char ** argv ){
 
-	const char * ip = "127.0.0.1";
-	const short port = 18809;
 	char buffer[BUFFER];
 
 	struct sockaddr_in server_addr;
@@ -47,7 +43,9 @@ int main(int argc, char ** argv ){
 
 	if(*ip!='\0'){
 		
-		server_addr.sin_addr.s_addr = inet_addr(ip);
+		//server_addr.sin_addr.s_addr = inet_addr(ip);
+		inet_pton(AF_INET, ip, &server_addr.sin_addr);
+
 		if( INADDR_NONE == server_addr.sin_addr.s_addr){
 			std::cout<<"inet_addr failed"<<std::endl;
 		}
@@ -76,7 +74,13 @@ int main(int argc, char ** argv ){
 
 	for(;;){
 		int accept_fd = accept(sockfd, (struct sockaddr *)& accept_addr, &accept_len);
-		echo(accept_fd);
+		if(accept_fd > 0){
+			echo(accept_fd);
+		}
+		else{
+			std::cout<<"accept failed"<<std::endl;
+			continue;
+		}
 	}
 
 	close(sockfd);

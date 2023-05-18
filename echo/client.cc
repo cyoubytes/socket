@@ -4,13 +4,11 @@
 #include<arpa/inet.h>
 #include<netinet/in.h>
 #include<unistd.h>
+#include"config.h"
 
-#define BUFFER 4096
 
 int main(int argc, char ** argv){
 	
-	const char * ip = "127.0.0.1";
-	const short port = 18809;
 	
 	if(INADDR_NONE == inet_addr(ip)){
 		std::cout<<"inavlid ip"<<std::endl;
@@ -50,11 +48,7 @@ int main(int argc, char ** argv){
 				std::cout<<buffer;
 			}
 		}
-
 		close(sockfd);
 	}
-
-	
-
 }
 
